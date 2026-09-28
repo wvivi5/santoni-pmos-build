@@ -1,0 +1,20 @@
+name: Build postmarketOS
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build postmarketOS
+        uses: postmarketOS/pmbootstrap-action@main
+        with:
+          device: xiaomi-santoni
+          ui: sxmo-de-dwm
+          extra_options: "--split --sparse"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: postmarketos-xiaomi-santoni
+          path: /home/runner/.local/var/pmbootstrap/chroot_rootfs_xiaomi-santoni/home/pmos/ # 调整为实际产出路径
