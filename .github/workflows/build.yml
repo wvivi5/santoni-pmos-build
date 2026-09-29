@@ -15,24 +15,20 @@ jobs:
           sudo ln -s $(pwd)/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
       - name: Build postmarketOS
         run: |
-          # 建立标准工作目录和 pmaports 路径
+          # 确保在运行前清理旧的 work 目录，避免迁移错误
+          rm -rf /home/runner/work
           mkdir -p /home/runner/work /home/runner/pmaports
+          
+          # 克隆 pmaports
           git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
           
-          # 创建符合 INI 格式的配置文件，这是 pmbootstrap 预期的
-          mkdir -p /home/runner/.config/pmbootstrap
-          cat <<INI > /home/runner/.config/pmbootstrap/config.ini
-          [pmbootstrap]
-          work = /home/runner/work
-          aports = /home/runner/pmaports
-          device = xiaomi-santoni
-          ui = sxmo-de-dwm
-          timezone = Asia/Shanghai
-          mirrors_rsync = http://dl.alpinelinux.org/alpine/
-          INI
+          # 直接使用环境变量初始化，避免配置文件过时导致的问题
+          export PMB_WORK=/home/runner/work
+          export PMB_APORTS=/home/runner/pmaports
           
-          # 运行安装，使用 --config 明确指定配置文件位置
-          python3 pmbootstrap/pmbootstrap.py --config /home/runner/.config/pmbootstrap/config.ini install
+          # 执行安装，不使用 config 文件，改用环境变量和交互自动应答
+          # 对于 CI 环境，pmbootstrap 可以通过这种方式运行
+          echo -e "y\ny\n" | python3 pmbootstrap/pmbootstrap.py install --split --sparse
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
