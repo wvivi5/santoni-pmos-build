@@ -15,24 +15,18 @@ jobs:
           sudo ln -s $(pwd)/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
       - name: Build postmarketOS
         run: |
-          # 建立绝对路径，避免依赖 pwd
+          # 建立标准工作目录和 pmaports 路径
           mkdir -p /home/runner/work /home/runner/pmaports
           
           # 克隆 pmaports
           git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
           
-          # 初始化配置
-          mkdir -p /home/runner/.config/pmbootstrap
-          
-          # 将当前目录下的脚本配置好
-          export PMB_WORK=/home/runner/work
-          export PMB_APORTS=/home/runner/pmaports
-          
-          # 使用 pmbootstrap init --config-create 自动创建基础配置
-          python3 pmbootstrap/pmbootstrap.py init --assume-yes
+          # 初始化配置 - 使用 -y 代替 --assume-yes
+          # 并在运行前显式指定配置目录
+          python3 pmbootstrap/pmbootstrap.py -y init
           
           # 执行安装
-          python3 pmbootstrap/pmbootstrap.py install --split --sparse
+          python3 pmbootstrap/pmbootstrap.py -y install --split --sparse
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
