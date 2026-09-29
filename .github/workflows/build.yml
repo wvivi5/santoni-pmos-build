@@ -16,20 +16,14 @@ jobs:
           sudo ln -s $(pwd)/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
       - name: Build postmarketOS
         run: |
-          # 运行构建，并使用正确的参数
-          # 确保环境变量设置
+          # 强制更新 pmbootstrap 环境配置
           export PMB_AS_ROOT=1
-          
-          # 检查 pmbootstrap 是否正常
-          python3 pmbootstrap/pmbootstrap.py --version
-          
-          # 生成配置文件 (通过创建必要的 config.json 或通过参数)
-          # 这里采用参数方式配置，避免交互
-          python3 pmbootstrap/pmbootstrap.py config work /home/runner/work
-          python3 pmbootstrap/pmbootstrap.py config aports /home/runner/pmaports
+          # 使用 init 命令并跳过所有配置步骤（创建空配置文件）
+          # pmbootstrap 会自动在 /home/runner/.config/pmbootstrap 中生成配置
+          python3 pmbootstrap/pmbootstrap.py init -w /home/runner/work -p /home/runner/pmaports -d xiaomi-santoni -u sxmo-de-dwm -t Asia/Shanghai
           
           # 执行构建
-          python3 pmbootstrap/pmbootstrap.py install --split --sparse --device xiaomi-santoni --ui sxmo-de-dwm --timezone Asia/Shanghai --non-interactive
+          python3 pmbootstrap/pmbootstrap.py install --split --sparse --non-interactive
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
