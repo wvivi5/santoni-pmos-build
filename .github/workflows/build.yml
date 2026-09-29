@@ -11,25 +11,25 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 python3-pip git openssl
-          # 直接使用 postmarketOS 的安装脚本（这是最稳定的方式）
           git clone https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git
           sudo ln -s $(pwd)/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
       - name: Build postmarketOS
         run: |
-          # 强制更新 pmbootstrap 环境配置
-          export PMB_AS_ROOT=1
+          # 1. 显式创建配置文件以跳过交互
+          mkdir -p /home/runner/.config/pmbootstrap
+          cat <<JSON > /home/runner/.config/pmbootstrap/config.json
+          {
+            "work": "/home/runner/work",
+            "aports": "/home/runner/pmaports",
+            "device": "xiaomi-santoni",
+            "ui": "sxmo-de-dwm",
+            "timezone": "Asia/Shanghai"
+          }
+          JSON
           
-          # 直接使用 pmbootstrap 的安装目录运行
-          # 初始化环境（仅在必要时执行，或者利用现有的 config）
-          python3 pmbootstrap/pmbootstrap.py init -w /home/runner/work -p /home/runner/pmaports
-          
-          # 使用 init 命令配置设备和环境（通过交互式模拟或参数）
-          # 由于我们之前遇到 init 报错，这里尝试直接配置设备信息
-          python3 pmbootstrap/pmbootstrap.py config device xiaomi-santoni
-          python3 pmbootstrap/pmbootstrap.py config ui sxmo-de-dwm
-          
-          # 构建
-          python3 pmbootstrap/pmbootstrap.py install --split --sparse --non-interactive
+          # 2. 直接执行安装，不再进行 init，因为 init 报错
+          # 使用 --yes 强制确认
+          python3 pmbootstrap/pmbootstrap.py install --split --sparse --non-interactive --yes
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
