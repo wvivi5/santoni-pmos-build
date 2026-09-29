@@ -25,10 +25,10 @@ jobs:
         run: |
           # 强制更新 pmbootstrap 环境配置
           export PMB_AS_ROOT=1
-          pmbootstrap --as-root init -w /home/runner/work -p /home/runner/pmaports -d xiaomi-santoni -u sxmo-de-dwm -t Asia/Shanghai -y
+          pmbootstrap init -w /home/runner/work -p /home/runner/pmaports -d xiaomi-santoni -u sxmo-de-dwm -t Asia/Shanghai -y
           
           # 尝试使用非交互式构建指令
-          pmbootstrap --as-root install --split --sparse
+          pmbootstrap install --split --sparse
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
