@@ -7,14 +7,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install pmbootstrap
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip git
+          pip3 install --break-system-packages pmbootstrap
       - name: Build postmarketOS
-        uses: postmarketOS/pmbootstrap-action@main
-        with:
-          device: xiaomi-santoni
-          ui: sxmo-de-dwm
-          extra_options: "--split --sparse"
+        run: |
+          # 创建必要目录
+          mkdir -p /home/runner/work /home/runner/pmaports
+          # 使用官方 pmaports
+          git clone --depth 1 https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
+          # 初始化 pmbootstrap
+          pmbootstrap init -w /home/runner/work -p /home/runner/pmaports -d xiaomi-santoni -u sxmo-de-dwm -t Asia/Shanghai
+          pmbootstrap build_init
+          # 执行安装
+          pmbootstrap install --split --sparse
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: postmarketos-xiaomi-santoni
-          path: /home/runner/.local/var/pmbootstrap/chroot_rootfs_xiaomi-santoni/home/pmos/ # 调整为实际产出路径
+          path: /home/runner/work/chroot_rootfs_xiaomi-santoni/home/pmos/
