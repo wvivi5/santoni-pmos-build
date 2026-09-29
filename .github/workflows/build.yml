@@ -13,23 +13,29 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 python3-pip git openssl
-          git clone https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git /tmp/pmbootstrap
+          git clone --depth 1 https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git /tmp/pmbootstrap
           sudo ln -s /tmp/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
       - name: Build postmarketOS
         run: |
-          # 建立标准工作目录，遵循 postmarketOS 官方 CI 的方式
+          # 1. 准备目录结构，并显式克隆 master 分支
           mkdir -p /home/runner/work /home/runner/pmaports
-          git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
+          git clone --depth 1 -b master https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
           
-          # 使用 init 配合 yes 工具模拟交互，确保不卡顿
-          yes "" | python3 /tmp/pmbootstrap/pmbootstrap.py --assume-yes init
+          # 2. 确保配置
+          mkdir -p /home/runner/.config/pmbootstrap
+          cat <<INI > /home/runner/.config/pmbootstrap/config.ini
+[pmbootstrap]
+work = /home/runner/work
+aports = /home/runner/pmaports
+device = xiaomi-santoni
+ui = sxmo-de-dwm
+timezone = Asia/Shanghai
+mirrors_rsync = http://dl.alpinelinux.org/alpine/
+          INI
           
-          # 配置设备和 UI
-          python3 /tmp/pmbootstrap/pmbootstrap.py config device xiaomi-santoni
-          python3 /tmp/pmbootstrap/pmbootstrap.py config ui sxmo-de-dwm
+          # 3. 安装
+          python3 /tmp/pmbootstrap/pmbootstrap.py --config /home/runner/.config/pmbootstrap/config.ini install --split --sparse --assume-yes
           
-          # 执行安装
-          python3 /tmp/pmbootstrap/pmbootstrap.py install --split --sparse
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
