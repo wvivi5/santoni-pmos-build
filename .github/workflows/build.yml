@@ -1,5 +1,7 @@
 name: Build postmarketOS
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -21,7 +23,7 @@ jobs:
           # 2. 克隆 pmaports
           git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
           
-          # 3. 手动生成 pmbootstrap 配置文件，这是跳过 init 的最稳妥方法
+          # 3. 手动生成 pmbootstrap 配置文件
           mkdir -p /home/runner/.config/pmbootstrap
           cat <<INI > /home/runner/.config/pmbootstrap/config.ini
 [pmbootstrap]
@@ -33,7 +35,7 @@ timezone = Asia/Shanghai
 mirrors_rsync = http://dl.alpinelinux.org/alpine/
           INI
           
-          # 4. 直接执行安装，通过 --config 指向配置文件
+          # 4. 直接执行安装
           python3 /tmp/pmbootstrap/pmbootstrap.py --config /home/runner/.config/pmbootstrap/config.ini install --split --sparse
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
