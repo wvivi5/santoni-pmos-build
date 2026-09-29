@@ -27,7 +27,7 @@ jobs:
 [pmbootstrap]
 work = /home/runner/work
 aports = /home/runner/pmaports
-device = xiaomi-santoni
+device = xiaomi-rolex
 ui = sxmo-de-dwm
 timezone = Asia/Shanghai
 mirrors_rsync = http://dl.alpinelinux.org/alpine/
@@ -39,5 +39,5 @@ mirrors_rsync = http://dl.alpinelinux.org/alpine/
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: postmarketos-xiaomi-santoni
-          path: /home/runner/work/chroot_rootfs_xiaomi-santoni/
+          name: postmarketos-xiaomi-rolex
+          path: /home/runner/work/chroot_rootfs_xiaomi-rolex/
