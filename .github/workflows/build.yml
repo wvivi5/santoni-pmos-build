@@ -15,11 +15,27 @@ jobs:
           sudo ln -s $(pwd)/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
       - name: Build postmarketOS
         run: |
-          # 克隆 aports
-          git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
+          # 建立标准工作目录
+          mkdir -p /home/runner/.local/var/pmbootstrap/cache_git
           
-          # 直接使用 --aports 指定路径运行，绕过 init 错误
-          python3 pmbootstrap/pmbootstrap.py --aports /home/runner/pmaports install
+          # 克隆 pmaports
+          git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/.local/var/pmbootstrap/cache_git/pmaports
+          
+          # 创建最基本的配置文件（不带交互）
+          mkdir -p /home/runner/.config/pmbootstrap
+          cat <<JSON > /home/runner/.config/pmbootstrap/config.json
+          {
+            "work": "/home/runner/work",
+            "aports": "/home/runner/.local/var/pmbootstrap/cache_git/pmaports",
+            "device": "xiaomi-santoni",
+            "ui": "sxmo-de-dwm",
+            "timezone": "Asia/Shanghai",
+            "mirrors_rsync": "http://dl.alpinelinux.org/alpine/"
+          }
+          JSON
+          
+          # 执行安装
+          python3 pmbootstrap/pmbootstrap.py install
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
