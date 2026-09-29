@@ -16,17 +16,25 @@ jobs:
       - name: Build postmarketOS
         run: |
           # 建立标准工作目录
-          mkdir -p /home/runner/.local/var/pmbootstrap/cache_git
+          mkdir -p /home/runner/work /home/runner/pmaports
           
           # 克隆 pmaports
-          git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/.local/var/pmbootstrap/cache_git/pmaports
+          git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
           
-          # 确保配置文件目录存在
-          mkdir -p /home/runner/.config/pmbootstrap
+          # 执行初始化，使用环境变量预填值
+          # 通过 export 覆盖交互式输入
+          export PMB_WORK=/home/runner/work
+          export PMB_APORTS=/home/runner/pmaports
           
-          # 尝试使用 --config 显式指定配置文件
-          python3 pmbootstrap/pmbootstrap.py --config /home/runner/.config/pmbootstrap/config.json init
-          python3 pmbootstrap/pmbootstrap.py --config /home/runner/.config/pmbootstrap/config.json install
+          # 尝试通过环境变量运行 pmbootstrap
+          python3 pmbootstrap/pmbootstrap.py --assume-yes init
+          
+          # 强制修改配置
+          python3 pmbootstrap/pmbootstrap.py config device xiaomi-santoni
+          python3 pmbootstrap/pmbootstrap.py config ui sxmo-de-dwm
+          
+          # 执行安装
+          python3 pmbootstrap/pmbootstrap.py install
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
