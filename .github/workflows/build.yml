@@ -19,21 +19,20 @@ jobs:
           mkdir -p /home/runner/work /home/runner/pmaports
           git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
           
-          # 创建显式配置文件，指向我们刚创建的路径
+          # 创建符合 INI 格式的配置文件，这是 pmbootstrap 预期的
           mkdir -p /home/runner/.config/pmbootstrap
-          cat <<JSON > /home/runner/.config/pmbootstrap/config.json
-          {
-            "work": "/home/runner/work",
-            "aports": "/home/runner/pmaports",
-            "device": "xiaomi-santoni",
-            "ui": "sxmo-de-dwm",
-            "timezone": "Asia/Shanghai",
-            "mirrors_rsync": "http://dl.alpinelinux.org/alpine/"
-          }
-          JSON
+          cat <<INI > /home/runner/.config/pmbootstrap/config.ini
+          [pmbootstrap]
+          work = /home/runner/work
+          aports = /home/runner/pmaports
+          device = xiaomi-santoni
+          ui = sxmo-de-dwm
+          timezone = Asia/Shanghai
+          mirrors_rsync = http://dl.alpinelinux.org/alpine/
+          INI
           
           # 运行安装，使用 --config 明确指定配置文件位置
-          python3 pmbootstrap/pmbootstrap.py --config /home/runner/.config/pmbootstrap/config.json install
+          python3 pmbootstrap/pmbootstrap.py --config /home/runner/.config/pmbootstrap/config.ini install
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
