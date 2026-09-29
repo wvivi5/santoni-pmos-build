@@ -9,36 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install dependencies
+      - name: Build
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 python3-pip git openssl
           git clone https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git /tmp/pmbootstrap
-          sudo ln -s /tmp/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
-      - name: Build postmarketOS
-        run: |
-          # 1. 准备目录结构
-          mkdir -p /home/runner/work /home/runner/pmaports
-          
-          # 2. 克隆 pmaports
-          git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
-          
-          # 3. 手动生成 pmbootstrap 配置文件
-          mkdir -p /home/runner/.config/pmbootstrap
-          cat <<INI > /home/runner/.config/pmbootstrap/config.ini
-[pmbootstrap]
-work = /home/runner/work
-aports = /home/runner/pmaports
-device = xiaomi-santoni
-ui = sxmo-de-dwm
-timezone = Asia/Shanghai
-mirrors_rsync = http://dl.alpinelinux.org/alpine/
-          INI
-          
-          # 4. 直接执行安装
-          python3 /tmp/pmbootstrap/pmbootstrap.py --config /home/runner/.config/pmbootstrap/config.ini install --split --sparse
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: postmarketos-xiaomi-santoni
-          path: /home/runner/work/chroot_rootfs_xiaomi-santoni/
+          python3 /tmp/pmbootstrap/pmbootstrap.py --assume-yes init
+          python3 /tmp/pmbootstrap/pmbootstrap.py --assume-yes install --split --sparse
