@@ -15,7 +15,7 @@ jobs:
           sudo ln -s $(pwd)/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
       - name: Build postmarketOS
         run: |
-          # 1. 显式创建配置文件以跳过交互
+          # 1. 显式创建配置文件以跳过交互，必须包含所有必要字段
           mkdir -p /home/runner/.config/pmbootstrap
           cat <<JSON > /home/runner/.config/pmbootstrap/config.json
           {
@@ -23,13 +23,13 @@ jobs:
             "aports": "/home/runner/pmaports",
             "device": "xiaomi-santoni",
             "ui": "sxmo-de-dwm",
-            "timezone": "Asia/Shanghai"
+            "timezone": "Asia/Shanghai",
+            "mirrors_rsync": "http://dl.alpinelinux.org/alpine/"
           }
           JSON
           
-          # 2. 直接执行安装，不再进行 init，因为 init 报错
-          # 使用 --yes 强制确认
-          python3 pmbootstrap/pmbootstrap.py install --split --sparse --non-interactive --yes
+          # 2. 直接执行安装，移除所有不支持的参数
+          python3 pmbootstrap/pmbootstrap.py install
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
