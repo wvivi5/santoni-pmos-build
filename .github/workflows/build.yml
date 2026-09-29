@@ -15,18 +15,23 @@ jobs:
           sudo ln -s $(pwd)/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
       - name: Build postmarketOS
         run: |
-          # 1. 彻底清理：删除可能存在旧配置和旧 work 的目录
+          # 显式回到工作区
+          cd $GITHUB_WORKSPACE
+          
+          # 彻底清理
           sudo rm -rf /home/runner/work /home/runner/.local/var/pmbootstrap /home/runner/.config/pmbootstrap
           mkdir -p /home/runner/work /home/runner/pmaports
           
-          # 2. 克隆 pmaports
+          # 克隆 pmaports
           git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
           
-          # 3. 运行初始化并创建一个全新的配置
-          # 使用 --yes 自动确认，避免交互卡住
+          # 运行初始化，使用 -y 自动确认，避免交互
+          # 同时使用环境变量指定路径
+          export PMB_WORK=/home/runner/work
+          export PMB_APORTS=/home/runner/pmaports
           python3 pmbootstrap/pmbootstrap.py -y init
           
-          # 4. 执行安装
+          # 执行安装
           python3 pmbootstrap/pmbootstrap.py -y install --split --sparse
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
