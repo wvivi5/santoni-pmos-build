@@ -15,28 +15,11 @@ jobs:
           sudo ln -s $(pwd)/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
       - name: Build postmarketOS
         run: |
-          # 建立必要的目录结构
-          mkdir -p /home/runner/work /home/runner/pmaports /home/runner/config
-          
-          # 创建配置文件
-          cat <<JSON > /home/runner/config/config.json
-          {
-            "work": "/home/runner/work",
-            "aports": "/home/runner/pmaports",
-            "device": "xiaomi-santoni",
-            "ui": "sxmo-de-dwm",
-            "timezone": "Asia/Shanghai"
-          }
-          JSON
-          
-          # 克隆 pmaports
+          # 克隆 aports
           git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
           
-          # 设置 PMB_CONFIG 环境变量指向我们的配置文件
-          export PMB_CONFIG=/home/runner/config/config.json
-          
-          # 执行安装
-          python3 pmbootstrap/pmbootstrap.py install
+          # 直接使用 --aports 指定路径运行，绕过 init 错误
+          python3 pmbootstrap/pmbootstrap.py --aports /home/runner/pmaports install
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
