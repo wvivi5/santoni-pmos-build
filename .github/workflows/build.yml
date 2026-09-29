@@ -15,20 +15,28 @@ jobs:
           sudo ln -s $(pwd)/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
       - name: Build postmarketOS
         run: |
-          # 建立标准工作目录和 pmaports 路径
-          mkdir -p /home/runner/work /home/runner/pmaports
+          # 1. 强制清理并准备目录
+          rm -rf /home/runner/work /home/runner/.local/var/pmbootstrap /home/runner/.config/pmbootstrap
+          mkdir -p /home/runner/work /home/runner/.local/var/pmbootstrap/cache_git/pmaports
           
-          # 克隆 pmaports
-          git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
+          # 2. 克隆 pmaports 到 pmbootstrap 指定的默认路径
+          git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/.local/var/pmbootstrap/cache_git/pmaports
           
-          # 设置 PMB_WORK 和 PMB_APORTS
-          export PMB_WORK=/home/runner/work
-          export PMB_APORTS=/home/runner/pmaports
+          # 3. 生成基础配置文件 (必须存在 section [pmbootstrap])
+          mkdir -p /home/runner/.config/pmbootstrap
+          cat <<INI > /home/runner/.config/pmbootstrap/config.ini
+          [pmbootstrap]
+          work = /home/runner/work
+          aports = /home/runner/.local/var/pmbootstrap/cache_git/pmaports
+          device = xiaomi-santoni
+          ui = sxmo-de-dwm
+          timezone = Asia/Shanghai
+          mirrors_rsync = http://dl.alpinelinux.org/alpine/
+          INI
           
-          # 运行 init 和 install，避免在 install 之前进行 interactive 操作
-          # 使用 --yes 参数
-          python3 pmbootstrap/pmbootstrap.py --assume-yes init
-          python3 pmbootstrap/pmbootstrap.py --assume-yes install --split --sparse
+          # 4. 执行安装
+          # 这里不运行 init，直接通过 --config 运行 install
+          python3 pmbootstrap/pmbootstrap.py --config /home/runner/.config/pmbootstrap/config.ini install --split --sparse
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
