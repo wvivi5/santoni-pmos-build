@@ -21,12 +21,20 @@ jobs:
           # 克隆 pmaports
           git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
           
-          # 初始化配置 - 使用 -y 代替 --assume-yes
-          # 并在运行前显式指定配置目录
-          python3 pmbootstrap/pmbootstrap.py -y init
+          # 创建一个有效的 config.ini
+          mkdir -p /home/runner/.config/pmbootstrap
+          cat <<INI > /home/runner/.config/pmbootstrap/config.ini
+          [pmbootstrap]
+          work = /home/runner/work
+          aports = /home/runner/pmaports
+          device = xiaomi-santoni
+          ui = sxmo-de-dwm
+          timezone = Asia/Shanghai
+          mirrors_rsync = http://dl.alpinelinux.org/alpine/
+          INI
           
-          # 执行安装
-          python3 pmbootstrap/pmbootstrap.py -y install --split --sparse
+          # 运行 install 并使用我们创建的 config.ini
+          python3 pmbootstrap/pmbootstrap.py --config /home/runner/.config/pmbootstrap/config.ini install --split --sparse
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
