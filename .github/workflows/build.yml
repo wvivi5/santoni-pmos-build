@@ -18,11 +18,17 @@ jobs:
         run: |
           # 强制更新 pmbootstrap 环境配置
           export PMB_AS_ROOT=1
-          # 使用 init 命令并跳过所有配置步骤（创建空配置文件）
-          # pmbootstrap 会自动在 /home/runner/.config/pmbootstrap 中生成配置
-          python3 pmbootstrap/pmbootstrap.py init -w /home/runner/work -p /home/runner/pmaports -d xiaomi-santoni -u sxmo-de-dwm -t Asia/Shanghai
           
-          # 执行构建
+          # 直接使用 pmbootstrap 的安装目录运行
+          # 初始化环境（仅在必要时执行，或者利用现有的 config）
+          python3 pmbootstrap/pmbootstrap.py init -w /home/runner/work -p /home/runner/pmaports
+          
+          # 使用 init 命令配置设备和环境（通过交互式模拟或参数）
+          # 由于我们之前遇到 init 报错，这里尝试直接配置设备信息
+          python3 pmbootstrap/pmbootstrap.py config device xiaomi-santoni
+          python3 pmbootstrap/pmbootstrap.py config ui sxmo-de-dwm
+          
+          # 构建
           python3 pmbootstrap/pmbootstrap.py install --split --sparse --non-interactive
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
