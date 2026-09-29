@@ -21,21 +21,12 @@ jobs:
           # 克隆 pmaports
           git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/.local/var/pmbootstrap/cache_git/pmaports
           
-          # 创建最基本的配置文件（不带交互）
+          # 确保配置文件目录存在
           mkdir -p /home/runner/.config/pmbootstrap
-          cat <<JSON > /home/runner/.config/pmbootstrap/config.json
-          {
-            "work": "/home/runner/work",
-            "aports": "/home/runner/.local/var/pmbootstrap/cache_git/pmaports",
-            "device": "xiaomi-santoni",
-            "ui": "sxmo-de-dwm",
-            "timezone": "Asia/Shanghai",
-            "mirrors_rsync": "http://dl.alpinelinux.org/alpine/"
-          }
-          JSON
           
-          # 执行安装
-          python3 pmbootstrap/pmbootstrap.py install
+          # 尝试使用 --config 显式指定配置文件
+          python3 pmbootstrap/pmbootstrap.py --config /home/runner/.config/pmbootstrap/config.json init
+          python3 pmbootstrap/pmbootstrap.py --config /home/runner/.config/pmbootstrap/config.json install
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
