@@ -1,18 +1,37 @@
 name: Build postmarketOS
 on:
+  workflow_dispatch:
   push:
     branches: [main]
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build
+      - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 python3-pip git openssl
           git clone https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git /tmp/pmbootstrap
-          python3 /tmp/pmbootstrap/pmbootstrap.py --assume-yes init
-          python3 /tmp/pmbootstrap/pmbootstrap.py --assume-yes install --split --sparse
+          sudo ln -s /tmp/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
+      - name: Build postmarketOS
+        run: |
+          # 建立标准工作目录，遵循 postmarketOS 官方 CI 的方式
+          mkdir -p /home/runner/work /home/runner/pmaports
+          git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
+          
+          # 使用 init 配合 yes 工具模拟交互，确保不卡顿
+          yes "" | python3 /tmp/pmbootstrap/pmbootstrap.py --assume-yes init
+          
+          # 配置设备和 UI
+          python3 /tmp/pmbootstrap/pmbootstrap.py config device xiaomi-santoni
+          python3 /tmp/pmbootstrap/pmbootstrap.py config ui sxmo-de-dwm
+          
+          # 执行安装
+          python3 /tmp/pmbootstrap/pmbootstrap.py install --split --sparse
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: postmarketos-xiaomi-santoni
+          path: /home/runner/work/chroot_rootfs_xiaomi-santoni/
