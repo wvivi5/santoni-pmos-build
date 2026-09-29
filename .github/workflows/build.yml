@@ -15,26 +15,25 @@ jobs:
           sudo ln -s $(pwd)/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
       - name: Build postmarketOS
         run: |
-          # 建立标准工作目录
+          # 建立标准工作目录和 pmaports 路径
           mkdir -p /home/runner/work /home/runner/pmaports
-          
-          # 克隆 pmaports
           git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
           
-          # 执行初始化，使用环境变量预填值
-          # 通过 export 覆盖交互式输入
-          export PMB_WORK=/home/runner/work
-          export PMB_APORTS=/home/runner/pmaports
+          # 创建显式配置文件，指向我们刚创建的路径
+          mkdir -p /home/runner/.config/pmbootstrap
+          cat <<JSON > /home/runner/.config/pmbootstrap/config.json
+          {
+            "work": "/home/runner/work",
+            "aports": "/home/runner/pmaports",
+            "device": "xiaomi-santoni",
+            "ui": "sxmo-de-dwm",
+            "timezone": "Asia/Shanghai",
+            "mirrors_rsync": "http://dl.alpinelinux.org/alpine/"
+          }
+          JSON
           
-          # 尝试通过环境变量运行 pmbootstrap
-          python3 pmbootstrap/pmbootstrap.py --assume-yes init
-          
-          # 强制修改配置
-          python3 pmbootstrap/pmbootstrap.py config device xiaomi-santoni
-          python3 pmbootstrap/pmbootstrap.py config ui sxmo-de-dwm
-          
-          # 执行安装
-          python3 pmbootstrap/pmbootstrap.py install
+          # 运行安装，使用 --config 明确指定配置文件位置
+          python3 pmbootstrap/pmbootstrap.py --config /home/runner/.config/pmbootstrap/config.json install
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
