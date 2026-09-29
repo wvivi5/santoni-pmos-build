@@ -15,8 +15,11 @@ jobs:
           sudo ln -s $(pwd)/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
       - name: Build postmarketOS
         run: |
-          # 1. 显式创建配置文件以跳过交互，必须包含所有必要字段
+          # 显式配置 pmbootstrap 环境以规避 init 的错误
           mkdir -p /home/runner/.config/pmbootstrap
+          
+          # 创建一个最小配置文件，并明确指定 pmaports 的位置
+          # 在 GitHub Actions 中，我们通过 git clone 下载 pmaports 或者使用内置配置
           cat <<JSON > /home/runner/.config/pmbootstrap/config.json
           {
             "work": "/home/runner/work",
@@ -28,7 +31,10 @@ jobs:
           }
           JSON
           
-          # 2. 直接执行安装，移除所有不支持的参数
+          # 关键步骤：下载 pmaports，否则 install 会报错找不到
+          git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
+          
+          # 执行安装
           python3 pmbootstrap/pmbootstrap.py install
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
