@@ -15,24 +15,25 @@ jobs:
           sudo ln -s $(pwd)/pmbootstrap/pmbootstrap.py /usr/local/bin/pmbootstrap
       - name: Build postmarketOS
         run: |
-          # 显式配置 pmbootstrap 环境以规避 init 的错误
-          mkdir -p /home/runner/.config/pmbootstrap
+          # 建立必要的目录结构
+          mkdir -p /home/runner/work /home/runner/pmaports /home/runner/config
           
-          # 创建一个最小配置文件，并明确指定 pmaports 的位置
-          # 在 GitHub Actions 中，我们通过 git clone 下载 pmaports 或者使用内置配置
-          cat <<JSON > /home/runner/.config/pmbootstrap/config.json
+          # 创建配置文件
+          cat <<JSON > /home/runner/config/config.json
           {
             "work": "/home/runner/work",
             "aports": "/home/runner/pmaports",
             "device": "xiaomi-santoni",
             "ui": "sxmo-de-dwm",
-            "timezone": "Asia/Shanghai",
-            "mirrors_rsync": "http://dl.alpinelinux.org/alpine/"
+            "timezone": "Asia/Shanghai"
           }
           JSON
           
-          # 关键步骤：下载 pmaports，否则 install 会报错找不到
+          # 克隆 pmaports
           git clone https://gitlab.postmarketos.org/postmarketOS/pmaports.git /home/runner/pmaports
+          
+          # 设置 PMB_CONFIG 环境变量指向我们的配置文件
+          export PMB_CONFIG=/home/runner/config/config.json
           
           # 执行安装
           python3 pmbootstrap/pmbootstrap.py install
